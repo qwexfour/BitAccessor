@@ -29,6 +29,23 @@ constexpr T calcMask()
     return mask;
 }
 
+// Class provides access to particular bits of an encapsulated
+// value. T is the type of the value.
+//
+// T meant to be something like int, it can be your custom
+// class, but the class must support bit operations (<<, |, &,...)
+// with propper semantics.
+//
+// Parameter fields shows how to split the value. Each value in the pack
+// represents the size of "bit field", the first one represent the lowest
+// bits and so on.
+//
+// For example:
+// bitaccessor<uint8_t, 1, 2, 3, 2> eg(42);
+//                     /  /   |   \
+//                    v  v    v    v
+//                   |0|1 0|1 0 1|0 0| = 42
+//                    0 1 2 3 4 5 6 7
 template<typename T, bitsize_t ...fields>
 struct bitaccessor
 {
@@ -40,9 +57,12 @@ struct bitaccessor
     bitaccessor& operator=(const bitaccessor&) = default;
     bitaccessor& operator=(bitaccessor&&) = default;
 
+    // get the whole value
     T get_value() { return val_; } const
+    // set the whole value
     void set_value(T val) { val_ = val; }
 
+    // get the field with the index = idx
     template<bitsize_t idx>
     T get_field() const
     {
@@ -51,6 +71,7 @@ struct bitaccessor
         tmp = tmp & calcMask<T, idx, fields...>();
         return tmp;
     }
+    // set the field with the index = idx
     template<int idx>
     void set_field(T field_val)
     {
